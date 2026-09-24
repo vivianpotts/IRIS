@@ -1,3 +1,3 @@
-<img width="518" height="392" alt="Screenshot_2026-02-20_at_11 14 17_AM-removebg-preview" src="https://github.com/user-attachments/assets/6de7ec04-a4dd-4bc7-b18c-b432536f6679" />
+<img width="362" height="291" alt="iris logo" src="https://github.com/user-attachments/assets/67238730-8f32-4c40-9860-997fd7ac4eaa" />
 
 IRIS is an interactive platform utilizing eye tracking technology to an online platform. 
