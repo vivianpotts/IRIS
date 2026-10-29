@@ -3,149 +3,556 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>8 Slots + WebGazer</title>
+  <title>IRIS — Gaze Selection</title>
   <style>
-    body {
-      font-family: system-ui, -apple-system, Segoe UI, Poppins, Arial, sans-serif;
-      margin: 0;
-      background: #2b312f;
-      color: #7dfff6;
-      height: 100vh;
-      overflow: hidden;
+    :root {
+      color-scheme: dark;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #e8edf5;
+      background: #080d14;
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+      --surface: #111923;
+      --surface-raised: #151f2b;
+      --line: rgba(163, 183, 205, 0.15);
+      --muted: #8290a2;
+      --mint: #73f5c5;
+      --cyan: #72d9f6;
     }
 
-    /* ---------- Start screen ---------- */
+    * { box-sizing: border-box; }
+
+    body {
+      min-width: 320px;
+      min-height: 100vh;
+      margin: 0;
+      overflow-x: hidden;
+      overflow-y: auto;
+      background:
+        radial-gradient(ellipse at 82% 10%, rgba(31, 119, 131, 0.13), transparent 34rem),
+        radial-gradient(ellipse at 8% 90%, rgba(36, 76, 125, 0.13), transparent 32rem),
+        #080d14;
+    }
+
+    button, textarea { font: inherit; }
+    button:focus-visible, textarea:focus-visible {
+      outline: 2px solid var(--mint);
+      outline-offset: 3px;
+    }
+
     .start-screen {
-      height: 100vh;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background-image:
+        linear-gradient(rgba(141, 168, 193, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(141, 168, 193, 0.035) 1px, transparent 1px);
+      background-size: 48px 48px;
+    }
+
+    .start-card {
+      width: min(1120px, 100%);
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+      gap: clamp(32px, 6vw, 72px);
+      align-items: center;
+      padding: clamp(26px, 4vw, 54px);
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      background: linear-gradient(145deg, rgba(19, 29, 41, 0.96), rgba(11, 17, 26, 0.96));
+      box-shadow: 0 32px 100px rgba(0, 0, 0, 0.38), inset 0 1px rgba(255, 255, 255, 0.04);
+    }
+
+    .brand {
       display: flex;
       align-items: center;
-      justify-content: center;
-      padding: 24px;
-      text-align: center;
-    }
-    .start-card {
-      background: rgba(137, 137, 137, 0.75);
-      border: 2px solid rgba(65, 255, 211, 0.9);
-      border-radius: 18px;
-      padding: 28px 22px;
-      max-width: 720px;
-      width: 100%;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-    }
-    .start-card h1 {
-      margin: 0 0 10px;
-      font-size: 34px;
-    }
-    .start-card p {
-      margin: 0;
-      font-size: 18px;
-      line-height: 1.45;
-      color: #333;
+      gap: 13px;
+      margin-bottom: 34px;
     }
 
-    /* ---------- App layout ---------- */
+    .brand img {
+      width: 42px;
+      height: 42px;
+      object-fit: contain;
+      border-radius: 12px;
+    }
+
+    .brand-name {
+      color: #f1f6fa;
+      font-size: 15px;
+      font-weight: 750;
+      letter-spacing: 0.18em;
+    }
+
+    .brand-caption {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 10px;
+      letter-spacing: 0.08em;
+    }
+
+    .eyebrow {
+      margin: 0 0 17px;
+      color: var(--mint);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 11px;
+      font-weight: 650;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    .start-card h1 {
+      max-width: 600px;
+      margin: 0;
+      color: #f4f7fb;
+      font-size: clamp(36px, 4.7vw, 60px);
+      font-weight: 650;
+      letter-spacing: -0.055em;
+      line-height: 1.02;
+    }
+
+    .intro-copy {
+      max-width: 490px;
+      margin: 17px 0 0;
+      color: #9ba9b9;
+      font-size: 16px;
+      line-height: 1.75;
+    }
+
+    .launch-panel {
+      padding: 22px;
+      border: 1px solid rgba(163, 183, 205, 0.13);
+      border-radius: 20px;
+      background: rgba(5, 10, 17, 0.42);
+    }
+
+    .panel-heading {
+      margin: 0 0 18px;
+      color: #dce5ef;
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    .steps {
+      display: grid;
+      gap: 12px;
+      margin: 0 0 20px;
+      padding: 0;
+      list-style: none;
+    }
+
+    .steps li {
+      display: flex;
+      gap: 13px;
+      align-items: flex-start;
+      color: #a4b1c0;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .step-number {
+      display: grid;
+      width: 25px;
+      height: 25px;
+      flex: 0 0 25px;
+      place-items: center;
+      border: 1px solid rgba(115, 245, 197, 0.28);
+      border-radius: 8px;
+      color: var(--mint);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 11px;
+    }
+
+    .start-button {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 15px 17px;
+      border: 1px solid rgba(115, 245, 197, 0.65);
+      border-radius: 12px;
+      background: var(--mint);
+      color: #07120f;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 750;
+      transition: background 160ms ease, transform 160ms ease;
+    }
+
+    .start-button:hover { background: #9bffda; transform: translateY(-1px); }
+
+    .keyboard-hint {
+      margin: 13px 0 0;
+      color: #78889a;
+      font-size: 11px;
+      text-align: center;
+    }
+
+    kbd {
+      padding: 3px 6px;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      color: #c8d2de;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 10px;
+    }
+
     .app {
       height: 100vh;
-      display: none; /* hidden until start */
+      min-height: 0;
+      display: none;
       flex-direction: column;
     }
 
+    .app-header {
+      display: flex;
+      min-height: 76px;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 28px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(11, 17, 25, 0.82);
+    }
+
+    .app-header .brand { margin: 0; }
+    .session-label {
+      color: #8695a6;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+    }
+
+    .connection {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      color: #aab6c4;
+      font-size: 12px;
+    }
+
+    .connection-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #687789;
+      box-shadow: 0 0 10px rgba(115, 245, 197, 0.28);
+    }
+
+    .connection.is-live .connection-dot { background: var(--mint); }
+    .connection.is-error .connection-dot { background: #ff8290; }
+
     .board {
       flex: 1;
+      min-height: 0;
       display: grid;
-      gap: 16px;
-      padding: 20px;
-      box-sizing: border-box;
-
-      /* default updated dynamically by JS */
-      grid-template-columns: repeat(4, 1fr);
-      grid-template-rows: repeat(2, 1fr);
+      gap: 14px;
+      padding: 24px 28px 14px;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-rows: repeat(2, minmax(0, 1fr));
     }
 
     .slot {
-      background: #989898;
-      border: 3px solid #d7dbe7;
-      border-radius: 16px;
-      padding: 14px;
-      box-sizing: border-box;
-
+      position: relative;
+      min-width: 0;
       display: flex;
       align-items: center;
       justify-content: center;
-
-      font-weight: 700;
-      font-size: clamp(18px, 2.6vw, 44px);
-      text-align: center;
-
-      user-select: none;
-      white-space: pre-wrap;     /* show spaces + newlines */
       overflow: hidden;
+      padding: 40px 18px 22px;
+      border: 1px solid rgba(163, 183, 205, 0.18);
+      border-radius: 18px;
+      background: linear-gradient(145deg, rgba(21, 31, 43, 0.92), rgba(14, 22, 32, 0.92));
+      color: #dce5ee;
+      text-align: center;
+      user-select: none;
+      white-space: pre-wrap;
+      transition: border-color 180ms ease, background 180ms ease, box-shadow 180ms ease;
+    }
+
+    .slot::before {
+      position: absolute;
+      top: 17px;
+      left: 18px;
+      color: #7f91a4;
+      content: "SLOT " attr(data-label);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+    }
+
+    .slot::after {
+      position: absolute;
+      top: 19px;
+      right: 19px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #4a5969;
+      content: "";
+    }
+
+    .slot-value {
+      max-width: 100%;
+      overflow-wrap: anywhere;
+      font-size: clamp(17px, 2vw, 30px);
+      font-weight: 600;
+      line-height: 1.35;
     }
 
     .slot.active {
-      border-color: #5bfa93;
-      box-shadow: 0 0 0 6px rgba(91, 124, 250, 0.2);
-    }
-    .slot.filled {
-      border-color: #f89752;
+      border-color: var(--mint);
+      background: linear-gradient(145deg, rgba(20, 52, 48, 0.72), rgba(15, 31, 37, 0.96));
+      box-shadow: 0 0 0 1px rgba(115, 245, 197, 0.18), 0 0 30px rgba(70, 224, 179, 0.08);
     }
 
-    .controls {
-      display: flex;
-      gap: 10px;
-      padding: 16px 20px 20px;
-      box-sizing: border-box;
-      align-items: stretch;
+    .slot.active::after, .slot.filled::after { background: var(--mint); }
+    .slot.filled { border-color: rgba(115, 245, 197, 0.34); }
+    .slot[data-side="left"] { outline-color: rgba(114, 217, 246, 0.35) !important; }
+    .slot[data-side="right"] { outline-color: rgba(255, 184, 112, 0.35) !important; }
+
+    .app-footer {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 16px;
+      align-items: end;
+      padding: 12px 28px 22px;
+      border-top: 1px solid var(--line);
+      background: rgba(11, 17, 25, 0.58);
+    }
+
+    .input-area { min-width: 0; }
+
+    .input-label {
+      display: block;
+      margin: 0 0 8px 2px;
+      color: #8797a9;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
     }
 
     textarea {
-      flex: 1;
-      resize: none;
-      height: 54px;
-      font-size: 18px;
-      padding: 12px 12px;
+      width: 100%;
+      min-height: 54px;
+      resize: vertical;
+      padding: 14px 16px;
+      border: 1px solid rgba(163, 183, 205, 0.2);
       border-radius: 12px;
-      border: 2px solid #d7dbe7;
       outline: none;
-      background: #fff;
-      line-height: 1.25;
-    }
-    textarea:focus {
-      border-color: #5b7cfa;
-      box-shadow: 0 0 0 4px rgba(91, 124, 250, 0.12);
+      background: #0c131d;
+      color: #e8edf5;
+      font-size: 15px;
+      line-height: 1.4;
     }
 
-    button {
-      padding: 12px 16px;
-      border-radius: 12px;
-      border: 0;
-      background: #111;
-      color: #fff;
-      cursor: pointer;
-      font-size: 16px;
-      min-width: 110px;
-    }
-    button:active { transform: translateY(1px); }
+    textarea::placeholder { color: #647487; }
+    textarea:focus { border-color: rgba(115, 245, 197, 0.7); }
+    textarea:disabled { opacity: 0.58; }
+
+    .footer-actions { display: flex; flex-direction: column; gap: 11px; }
 
     .status {
-      padding: 0 20px 18px;
-      color: #b6b6b6;
+      max-width: 300px;
+      color: #a0adbb;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 11px;
+      line-height: 1.5;
+      text-align: right;
     }
 
-    /* ---------- VERY VISIBLE Gaze dot overlay ---------- */
+    #resetBtn {
+      min-width: 108px;
+      padding: 11px 15px;
+      border: 1px solid rgba(163, 183, 205, 0.2);
+      border-radius: 10px;
+      background: #151f2b;
+      color: #dbe4ed;
+      cursor: pointer;
+      font-size: 12px;
+      transition: background 160ms ease, border-color 160ms ease;
+    }
+
+    #resetBtn:hover { border-color: rgba(163, 183, 205, 0.42); background: #1b2836; }
+    button:active { transform: translateY(1px); }
+
+    .result-area { display: none; min-width: 0; }
+    .app.is-complete .input-area { display: none; }
+    .app.is-complete .result-area { display: block; }
+
+    .result-buttons { display: flex; flex-wrap: wrap; gap: 10px; }
+
+    .result-buttons button {
+      padding: 13px 18px;
+      border: 1px solid rgba(163, 183, 205, 0.22);
+      border-radius: 11px;
+      background: #151f2b;
+      color: #dbe4ed;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: background 160ms ease, border-color 160ms ease;
+    }
+
+    .result-buttons button:hover { border-color: rgba(163, 183, 205, 0.42); background: #1b2836; }
+
+    .result-buttons button.primary {
+      border-color: rgba(115, 245, 197, 0.65);
+      background: var(--mint);
+      color: #07120f;
+    }
+
+    .result-buttons button.primary:hover { background: #9bffda; }
+
+    .slot.winner {
+      border-color: var(--mint);
+      box-shadow: 0 0 0 1px rgba(115, 245, 197, 0.2), 0 0 40px rgba(70, 224, 179, 0.12);
+    }
+
+    .calibration {
+      position: fixed;
+      inset: 0;
+      z-index: 999990;
+      display: none;
+      background: rgba(6, 10, 16, 0.94);
+    }
+
+    .calibration.show { display: block; }
+
+    .calibration-caption {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: min(420px, 84vw);
+      transform: translate(-50%, -50%);
+      text-align: center;
+      pointer-events: none;
+    }
+
+    .calibration-caption strong {
+      display: block;
+      margin-bottom: 8px;
+      color: #f1f6fa;
+      font-size: 17px;
+    }
+
+    .calibration-caption span {
+      color: #8f9eb0;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 11px;
+      letter-spacing: 0.06em;
+    }
+
+    .calibration-actions {
+      position: absolute;
+      left: 50%;
+      bottom: max(18px, env(safe-area-inset-bottom));
+      display: flex;
+      gap: 8px;
+      transform: translateX(-50%);
+    }
+
+    .calibration-actions button {
+      padding: 8px 14px;
+      border: 1px solid rgba(163, 183, 205, 0.25);
+      border-radius: 9px;
+      background: #151f2b;
+      color: #c8d2de;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .calibration-target {
+      position: absolute;
+      width: 46px;
+      height: 46px;
+      border: 2px solid var(--mint);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 0 24px rgba(115, 245, 197, 0.25);
+      transition: left 350ms ease, top 350ms ease;
+    }
+
+    .calibration-target::after {
+      position: absolute;
+      inset: 16px;
+      border-radius: 50%;
+      background: var(--mint);
+      content: "";
+    }
+
+    /* Compact camera preview docked in the header so it never covers the board or input. */
+    #webgazerVideoContainer {
+      top: 6px !important;
+      left: 50% !important;
+      width: 100px !important;
+      height: 75px !important;
+      transform: translateX(-50%);
+      overflow: hidden;
+      border: 1px solid rgba(163, 183, 205, 0.3);
+      border-radius: 10px;
+      z-index: 999995 !important;
+    }
+
+    #webgazerVideoContainer video,
+    #webgazerVideoContainer canvas {
+      width: 100px !important;
+      height: 75px !important;
+    }
+
+    #webgazerFaceFeedbackBox { border-width: 2px !important; }
+
+    .session-label { display: none; }
+
     .gaze-dot {
       position: fixed;
       left: -9999px;
       top: -9999px;
-      width: 22px;
-      height: 22px;
+      width: 18px;
+      height: 18px;
       border-radius: 999px;
-      background: rgba(255,0,0,0.95);
-      border: 3px solid rgba(255,255,255,0.95);
-      box-shadow: 0 0 14px rgba(255,0,0,0.75);
+      background: #ff6d79;
+      border: 3px solid #fff;
+      box-shadow: 0 0 18px rgba(255, 109, 121, 0.7);
       pointer-events: none;
       z-index: 999999;
       transform: translate(-50%, -50%);
+    }
+
+    @media (max-width: 760px) {
+      body { overflow: auto; }
+      .start-screen { padding: 20px; }
+      .start-card { grid-template-columns: 1fr; gap: 30px; padding: 28px; }
+      .brand { margin-bottom: 32px; }
+      .app { min-height: 100vh; height: auto; }
+      .app-header { min-height: 76px; padding: 10px 18px; }
+      .session-label { display: none; }
+      .board {
+        min-height: 520px;
+        gap: 10px;
+        padding: 16px 18px;
+      }
+      .app-footer { grid-template-columns: 1fr; padding: 14px 18px 20px; }
+      .footer-actions { flex-direction: row; align-items: center; justify-content: space-between; }
+      .status { max-width: none; text-align: left; }
+    }
+
+    @media (max-width: 420px) {
+      .start-card { padding: 22px; }
+      .launch-panel { padding: 20px; }
+      .app-header { padding-inline: 14px; }
+      .board { padding-inline: 14px; }
+      .slot { padding-inline: 12px; }
+      .slot::before { left: 12px; }
+      .slot-value { font-size: 16px; }
+      .app-footer { padding-inline: 14px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
     }
   </style>
 </head>
@@ -154,30 +561,81 @@
   <!-- Start screen -->
   <div class="start-screen" id="startScreen">
     <div class="start-card">
-      <h1>Press Return to Start</h1>
-      <p></p>
+      <section>
+        <div class="brand">
+          <img src="iris.logo.png" alt="" />
+          <div class="brand-name">IRIS<span class="brand-caption">GAZE INTERACTION SYSTEM</span></div>
+        </div>
+        <p class="eyebrow">A new way to choose</p>
+        <h1>Let your eyes do the talking.</h1>
+        <p class="intro-copy">A hands-free selection experience powered by real-time gaze tracking. Add your options, then look left or right to find your choice.</p>
+      </section>
+      <section class="launch-panel" aria-label="How it works">
+        <p class="panel-heading">SESSION OVERVIEW</p>
+        <ol class="steps">
+          <li><span class="step-number">01</span><span>Add eight words, ideas, or options to your selection board.</span></li>
+          <li><span class="step-number">02</span><span>Allow camera access so IRIS can follow your gaze.</span></li>
+          <li><span class="step-number">03</span><span>Look to either side as the choices narrow to one.</span></li>
+        </ol>
+        <button class="start-button" id="startBtn" type="button">
+          <span>Start a session</span><span aria-hidden="true">↗</span>
+        </button>
+        <p class="keyboard-hint">or press <kbd>Return</kbd> to begin</p>
+      </section>
     </div>
   </div>
 
   <!-- App -->
   <div class="app" id="app">
+    <header class="app-header">
+      <div class="brand">
+        <img src="iris.logo.png" alt="" />
+        <div class="brand-name">IRIS<span class="brand-caption">GAZE INTERACTION SYSTEM</span></div>
+      </div>
+      <span class="session-label">LIVE SELECTION / 8 NODES</span>
+      <div class="connection" id="cameraStatus"><span class="connection-dot" aria-hidden="true"></span><span>Camera idle</span></div>
+    </header>
     <div class="board" id="board" aria-label="8 slots">
-      <div class="slot" data-i="0">—</div>
-      <div class="slot" data-i="1">—</div>
-      <div class="slot" data-i="2">—</div>
-      <div class="slot" data-i="3">—</div>
-      <div class="slot" data-i="4">—</div>
-      <div class="slot" data-i="5">—</div>
-      <div class="slot" data-i="6">—</div>
-      <div class="slot" data-i="7">—</div>
+      <div class="slot" data-i="0" data-label="01"><span class="slot-value">—</span></div>
+      <div class="slot" data-i="1" data-label="02"><span class="slot-value">—</span></div>
+      <div class="slot" data-i="2" data-label="03"><span class="slot-value">—</span></div>
+      <div class="slot" data-i="3" data-label="04"><span class="slot-value">—</span></div>
+      <div class="slot" data-i="4" data-label="05"><span class="slot-value">—</span></div>
+      <div class="slot" data-i="5" data-label="06"><span class="slot-value">—</span></div>
+      <div class="slot" data-i="6" data-label="07"><span class="slot-value">—</span></div>
+      <div class="slot" data-i="7" data-label="08"><span class="slot-value">—</span></div>
     </div>
 
-    <div class="controls">
-      <textarea id="lineInput" placeholder="Type slot 1 text and press Return…" disabled></textarea>
-      <button id="resetBtn" type="button">Reset</button>
-    </div>
+    <footer class="app-footer">
+      <div class="input-area">
+        <label class="input-label" for="lineInput">Selection input</label>
+        <textarea id="lineInput" placeholder="Type slot 1 text and press Return…" disabled></textarea>
+      </div>
+      <div class="result-area" id="resultArea">
+        <span class="input-label">Selection complete</span>
+        <div class="result-buttons">
+          <button type="button" class="primary" id="replayBtn">Replay selection</button>
+          <button type="button" id="newInputsBtn">Enter new options</button>
+          <button type="button" id="homeBtn">Back to start</button>
+        </div>
+      </div>
+      <div class="footer-actions">
+        <div class="status" id="status" role="status" aria-live="polite">Waiting…</div>
+        <button id="resetBtn" type="button">Reset session</button>
+      </div>
+    </footer>
+  </div>
 
-    <div class="status" id="status">Waiting…</div>
+  <div class="calibration" id="calibration" role="dialog" aria-label="Gaze calibration">
+    <div class="calibration-caption">
+      <strong>Calibrating gaze</strong>
+      <span id="calibrationProgress">Follow the green target with your eyes</span>
+    </div>
+    <div class="calibration-target" id="calibrationTarget"></div>
+    <div class="calibration-actions">
+      <button type="button" id="calibrationSkip">Skip</button>
+      <button type="button" id="calibrationReset">Reset</button>
+    </div>
   </div>
 
   <div class="gaze-dot" id="gazeDot" aria-hidden="true"></div>
@@ -192,6 +650,8 @@
     const input = document.getElementById("lineInput");
     const statusEl = document.getElementById("status");
     const resetBtn = document.getElementById("resetBtn");
+    const startBtn = document.getElementById("startBtn");
+    const cameraStatus = document.getElementById("cameraStatus");
     const slots = Array.from(document.querySelectorAll(".slot"));
     const gazeDot = document.getElementById("gazeDot");
 
@@ -200,6 +660,14 @@
     const lines = Array(8).fill("");
 
     let webgazerStarted = false;
+    let calibrating = false;
+    let calibrationToken = 0;
+    let calibSampler = null;
+    const MAX_SAMPLES_PER_DOT = 10;
+    let lastCalibrationError = null;
+    const calibrationEl = document.getElementById("calibration");
+    const calibrationTarget = document.getElementById("calibrationTarget");
+    const calibrationProgress = document.getElementById("calibrationProgress");
 
     // --- Tournament state (8 -> 4 -> 2 -> 1) ---
     let activeIndices = [0,1,2,3,4,5,6,7];
@@ -231,8 +699,9 @@
     function updateBoardGrid() {
       const n = activeIndices.length;
 
-      // default: 8 items = 4x2
-      let cols = 4, rows = 2;
+      // Use a taller board on narrow screens while preserving the round layouts.
+      let cols = window.matchMedia("(max-width: 760px)").matches ? 2 : 4;
+      let rows = window.matchMedia("(max-width: 760px)").matches ? 4 : 2;
 
       if (n === 4) { cols = 2; rows = 2; }      // key change
       else if (n === 2) { cols = 2; rows = 1; } // big left/right
@@ -254,7 +723,7 @@
 
     function render() {
       slots.forEach((s, i) => {
-        s.textContent = lines[i] ? lines[i] : "—";
+        s.querySelector(".slot-value").textContent = lines[i] ? lines[i] : "—";
         s.classList.toggle("filled", Boolean(lines[i]));
       });
 
@@ -326,8 +795,171 @@
       return { leftGroup, rightGroup };
     }
 
-    function startChoiceRound() {
+    // Calibration targets are derived from the current viewport, so desktop
+    // and mobile screens each get a layout that covers their own gaze range.
+    function getCalibrationPoints() {
+      const w = window.innerWidth, h = window.innerHeight;
+      const narrow = w < 760 || h > w;
+      const cols = narrow ? 3 : 5;
+      const rows = narrow ? 4 : 4;
+      // Edge points sit close to the screen edges so the model never has to extrapolate.
+      const mx = Math.max(28, w * 0.04), my = Math.max(28, h * 0.06);
+      const pts = [];
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const rowCols = (r % 2) ? Array.from({ length: cols }, (_, k) => cols - 1 - k) : null;
+          const cc = rowCols ? rowCols[c] : c;
+          pts.push({
+            x: mx + (w - 2 * mx) * cc / (cols - 1),
+            y: my + (h - 2 * my) * r / (rows - 1)
+          });
+        }
+      }
+      return pts;
+    }
+
+    const sleep = (ms) => new Promise(res => setTimeout(res, ms));
+
+    function moveCalibrationTarget(x, y) {
+      calibrationTarget.style.left = x + "px";
+      calibrationTarget.style.top = y + "px";
+    }
+
+    function median(values) {
+      const s = values.slice().sort((a, b) => a - b);
+      return s.length ? s[Math.floor(s.length / 2)] : 0;
+    }
+
+    // Returns the mean pixel error across validation targets, or null if cancelled.
+    async function validateCalibration(token) {
+      const w = window.innerWidth, h = window.innerHeight;
+      const targets = [[0.2, 0.25], [0.8, 0.25], [0.5, 0.5], [0.2, 0.75], [0.8, 0.75]]
+        .map(([fx, fy]) => ({ x: w * fx, y: h * fy }));
+      const errors = [];
+
+      for (const t of targets) {
+        if (token !== calibrationToken) return null;
+        moveCalibrationTarget(t.x, t.y);
+        calibrationProgress.textContent = "Checking accuracy…";
+        await sleep(800);
+        const xs = [], ys = [];
+        calibSampler = { mode: "validate", xs, ys };
+        await sleep(700);
+        calibSampler = null;
+        if (xs.length < 3) continue;
+        errors.push(Math.hypot(median(xs) - t.x, median(ys) - t.y));
+      }
+
+      if (token !== calibrationToken) return null;
+      // No face / predictions: treat as inaccurate so the pass repeats.
+      if (!errors.length) return Infinity;
+      return errors.reduce((a, b) => a + b, 0) / errors.length;
+    }
+
+    async function runCalibration() {
+      const token = ++calibrationToken;
+      calibrating = true;
+      if (document.activeElement) document.activeElement.blur();
+      calibrationEl.classList.add("show");
+      cameraStatus.querySelector("span:last-child").textContent = "Calibrating";
+
+      // Start from a clean model: data stored for another window size or lighting hurts accuracy.
+      try { webgazer.clearData(); } catch (_) {}
+      // WebGazer keeps only the last 50 training samples by default, which would
+      // forget all but the final dots. Widen the window so every dot is retained.
+      try {
+        webgazer.getRegression().forEach((reg) => {
+          ["screenXClicksArray", "screenYClicksArray", "eyeFeaturesClicks"].forEach((k) => {
+            if (reg[k]) reg[k].windowSize = 1000;
+          });
+        });
+      } catch (_) {}
+
+      const SETTLE_MS = 900, SAMPLE_MS = 1300, MAX_PASSES = 3, MAX_ERROR_RATIO = 0.16;
+
+      for (let pass = 1; pass <= MAX_PASSES; pass++) {
+        const points = getCalibrationPoints();
+        // Later passes use a different order so the model sees points in a new sequence.
+        if (pass % 2 === 0) points.reverse();
+
+        for (let p = 0; p < points.length; p++) {
+          if (token !== calibrationToken) return false;
+          const { x, y } = points[p];
+          moveCalibrationTarget(x, y);
+          calibrationProgress.textContent =
+            `Keep your head still and look at the dot · pass ${pass} · ${p + 1} / ${points.length}`;
+
+          await sleep(SETTLE_MS);
+          // Train on every new prediction frame instead of duplicate timer ticks.
+          calibSampler = { mode: "train", x, y, n: 0, last: 0 };
+          await sleep(SAMPLE_MS);
+          calibSampler = null;
+        }
+
+        // Validate: measure where the model thinks you look vs. the real target.
+        const error = await validateCalibration(token);
+        if (error === null) return false;
+        const ratio = error / Math.min(window.innerWidth, window.innerHeight);
+        lastCalibrationError = Math.round(error);
+        if (ratio <= MAX_ERROR_RATIO) break;
+        calibrationProgress.textContent = "Refining accuracy…";
+        await sleep(600);
+      }
+
+      if (token !== calibrationToken) return false;
+      calibrating = false;
+      calibrationEl.classList.remove("show");
+      cameraStatus.querySelector("span:last-child").textContent =
+        Number.isFinite(lastCalibrationError) ? `Camera tracking · ±${lastCalibrationError}px` : "Camera tracking";
+      return true;
+    }
+
+    function cancelCalibration() {
+      calibSampler = null;
+      calibrationToken++;
+      calibrating = false;
+      calibrationEl.classList.remove("show");
+    }
+
+    // Recalibrate if the viewport changes substantially (rotation, window resize).
+    let calibratedSize = null;
+    let recalTimer = null;
+    window.addEventListener("resize", () => {
+      if (!webgazerStarted || calibrating || choosing || !calibratedSize) return;
+      clearTimeout(recalTimer);
+      recalTimer = setTimeout(() => {
+        const dw = Math.abs(window.innerWidth - calibratedSize.w) / calibratedSize.w;
+        const dh = Math.abs(window.innerHeight - calibratedSize.h) / calibratedSize.h;
+        if (dw > 0.15 || dh > 0.15) beginCalibrationThenContinue();
+      }, 600);
+    });
+
+    function skipCalibration() {
+      if (!calibrating) return;
+      cancelCalibration();
+      cameraStatus.querySelector("span:last-child").textContent = "Camera tracking";
+      finishCalibration();
+    }
+
+    async function beginCalibrationThenContinue() {
+      const ok = await runCalibration();
+      if (!ok || !webgazerStarted) return;
+      finishCalibration();
+    }
+
+    function finishCalibration() {
       if (!webgazerStarted) return;
+      calibratedSize = { w: window.innerWidth, h: window.innerHeight };
+      if (index >= 8) {
+        startChoiceRound();
+      } else {
+        statusEl.textContent = `Slot ${index + 1} of 8 (WebGazer calibrated)`;
+        input.focus();
+      }
+    }
+
+    function startChoiceRound() {
+      if (!webgazerStarted || calibrating) return;
       if (activeIndices.length <= 1) return;
 
       choosing = true;
@@ -375,14 +1007,53 @@
       } else {
         const winner = activeIndices[0];
         statusEl.textContent = `Winner: Slot ${winner + 1} → "${lines[winner] || "—"}"`;
+        slots[winner].classList.add("winner");
+        app.classList.add("is-complete");
+        document.getElementById("replayBtn").focus();
       }
+    }
+
+    function clearWinnerState() {
+      app.classList.remove("is-complete");
+      slots.forEach(s => s.classList.remove("winner"));
+    }
+
+    // Run the same options again, reusing the existing calibration.
+    function replaySelection() {
+      if (!started || !webgazerStarted || calibrating) return;
+      clearWinnerState();
+      activeIndices = [0,1,2,3,4,5,6,7];
+      choosing = false;
+      render();
+      startChoiceRound();
+    }
+
+    // Keep the camera and calibration running, but clear the options to type new ones.
+    function enterNewOptions() {
+      if (!started) return;
+      if (choiceTimer) clearTimeout(choiceTimer);
+      choiceTimer = null;
+      clearWinnerState();
+      choosing = false;
+      index = 0;
+      activeIndices = [0,1,2,3,4,5,6,7];
+      for (let i = 0; i < 8; i++) lines[i] = "";
+      slots.forEach(s => { s.style.outline = "none"; s.style.order = ""; s.dataset.side = ""; });
+      input.value = "";
+      input.disabled = false;
+      render();
+      input.focus();
     }
 
     async function startWebgazer() {
       if (webgazerStarted) return;
 
+      cameraStatus.classList.remove("is-live", "is-error");
+      cameraStatus.querySelector("span:last-child").textContent = "Connecting camera";
       if (!window.webgazer) {
         statusEl.textContent = "WebGazer not found on window.";
+        cameraStatus.classList.add("is-error");
+        cameraStatus.querySelector("span:last-child").textContent = "Camera unavailable";
         return;
       }
 
@@ -394,8 +1065,28 @@
           .showFaceFeedbackBox(true)
           .showPredictionPoints(false);
 
+        // Smooth jitter, and stop mouse movement from training the model with wrong gaze positions.
+        try { webgazer.applyKalmanFilter(true); } catch (_) {}
+        try { webgazer.saveDataAcrossSessions(false); } catch (_) {}
+        try { webgazer.removeMouseEventListeners(); } catch (_) {}
+
         webgazer.setGazeListener((data) => {
           if (!data) return;
+
+          if (calibSampler) {
+            if (calibSampler.mode === "train") {
+              // Cap and space samples so each dot contributes equally and the model isn't flooded with near-duplicates.
+              const now = performance.now();
+              if (calibSampler.n < MAX_SAMPLES_PER_DOT && now - calibSampler.last >= 90) {
+                calibSampler.n++;
+                calibSampler.last = now;
+                try { webgazer.recordScreenPosition(calibSampler.x, calibSampler.y, "click"); } catch (_) {}
+              }
+            } else {
+              calibSampler.xs.push(data.x);
+              calibSampler.ys.push(data.y);
+            }
+          }
 
           // Move OUR dot (always visible while running)
           showDotAt(data.x, data.y);
@@ -411,28 +1102,31 @@
         });
 
         await webgazer.begin();
+        try { webgazer.setVideoViewerSize(100, 75); } catch (_) {}
         webgazerStarted = true;
+        cameraStatus.classList.add("is-live");
+        cameraStatus.querySelector("span:last-child").textContent = "Camera tracking";
 
         // Put dot in center immediately so you can see it before first prediction arrives
         showDotAt(window.innerWidth / 2, window.innerHeight / 2);
 
-        // If typing is already done, begin tournament immediately
-        if (index >= 8) {
-          startChoiceRound();
-        } else {
-          statusEl.textContent = `Slot ${index + 1} of 8 (WebGazer running)`;
-        }
+        beginCalibrationThenContinue();
       } catch (err) {
         console.error(err);
         statusEl.textContent = "Could not start WebGazer (camera permission denied or unavailable).";
+        cameraStatus.classList.add("is-error");
+        cameraStatus.querySelector("span:last-child").textContent = "Camera unavailable";
       }
     }
 
     function stopWebgazer() {
-      if (!window.webgazer) return;
-      try { webgazer.pause(); } catch (_) {}
-      try { webgazer.end(); } catch (_) {}
+      if (window.webgazer) {
+        try { webgazer.pause(); } catch (_) {}
+        try { webgazer.end(); } catch (_) {}
+      }
       webgazerStarted = false;
+      cameraStatus.classList.remove("is-live", "is-error");
+      cameraStatus.querySelector("span:last-child").textContent = "Camera idle";
 
       // hide dot
       hideDot();
@@ -486,6 +1180,9 @@
     function resetAll() {
       if (choiceTimer) clearTimeout(choiceTimer);
       choiceTimer = null;
+      cancelCalibration();
+      calibratedSize = null;
+      clearWinnerState();
 
       // stop tracking + reset UI
       stopWebgazer();
@@ -505,7 +1202,7 @@
       input.disabled = true;
       statusEl.textContent = "Waiting…";
       slots.forEach(s => {
-        s.textContent = "—";
+        s.querySelector(".slot-value").textContent = "—";
         s.classList.remove("filled", "active");
         s.style.display = "flex";
         s.style.outline = "none";
@@ -541,6 +1238,14 @@
     });
 
     resetBtn.addEventListener("click", resetAll);
+    document.getElementById("replayBtn").addEventListener("click", replaySelection);
+    document.getElementById("newInputsBtn").addEventListener("click", enterNewOptions);
+    document.getElementById("homeBtn").addEventListener("click", resetAll);
+    startBtn.addEventListener("click", start);
+    document.getElementById("calibrationSkip").addEventListener("click", skipCalibration);
+    document.getElementById("calibrationReset").addEventListener("click", resetAll);
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") skipCalibration(); });
+    window.addEventListener("resize", updateBoardGrid);
 
     // initial state
     resetAll();
