@@ -591,7 +591,7 @@
   <div class="app" id="app">
     <header class="app-header">
       <div class="brand">
-        <img src="iris.logo.png" alt="" />
+        <img src="logo.png" alt="" />
         <div class="brand-name">IRIS<span class="brand-caption">GAZE INTERACTION SYSTEM</span></div>
       </div>
       <span class="session-label">LIVE SELECTION / 8 NODES</span>
@@ -774,6 +774,15 @@
         });
         rightGroup.forEach((idx, k) => {
           slots[idx].style.order = (k === 0) ? 2 : 4;
+        });
+      } else if (activeIndices.length === 8) {
+        // Left group fills the left half of the screen, right group the right half
+        const narrow = window.matchMedia("(max-width: 760px)").matches;
+        leftGroup.forEach((idx, k) => {
+          slots[idx].style.order = narrow ? k * 2 + 1 : (k < 2 ? k + 1 : k + 3);
+        });
+        rightGroup.forEach((idx, k) => {
+          slots[idx].style.order = narrow ? k * 2 + 2 : (k < 2 ? k + 3 : k + 5);
         });
       } else {
         // Otherwise keep a stable visible order
